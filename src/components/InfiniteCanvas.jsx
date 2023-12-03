@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import useNodes from '../hooks/useNodes';
 import useEdges from '../hooks/useEdges';
 import useCtrlKey from '../hooks/useCtrlKey';
-import isPointInANode from '../utils/isPointInNode';
 import {
   NODE_RADIUS,
   NODE_COLOR,
@@ -17,7 +16,8 @@ function InfiniteCanvas() {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [selectedNode, setSelectedNode] = useState(false);
   // hooked state
-  const { nodes, addNode, highlightNode, resetNodeColor } = useNodes();
+  const { nodes, addNode, highlightNode, resetNodeColor, isPointInANode } =
+    useNodes();
   const { edges, addEdge } = useEdges();
   const ctrlIsPressed = useCtrlKey();
 
@@ -35,7 +35,7 @@ function InfiniteCanvas() {
     const adjustedX = pointerPosition.x - stagePos.x;
     const adjustedY = pointerPosition.y - stagePos.y;
 
-    const clickedNode = isPointInANode(nodes, {
+    const clickedNode = isPointInANode({
       x: adjustedX,
       y: adjustedY,
     });

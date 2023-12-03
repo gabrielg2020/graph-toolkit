@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NODE_COLOR, NODE_HIGHLIGHT_COLOR } from '../constants/appConstants';
+import { NODE_COLOR, NODE_HIGHLIGHT_COLOR, NODE_RADIUS } from '../constants/appConstants';
 
 const useNodes = () => {
   const [nodes, setNodes] = useState([]);
@@ -16,7 +16,7 @@ const useNodes = () => {
           : node
       )
     );
-  }
+  };
 
   const resetNodeColor = () => {
     setNodes(
@@ -26,9 +26,24 @@ const useNodes = () => {
           : node
       )
     );
-  }
+  };
 
-  return { nodes, addNode, highlightNode, resetNodeColor };
+  const isPointInANode = (point) => {
+    const x = point.x;
+    const y = point.y;
+
+    return nodes.find((node) => {
+      const nodeX = node.x;
+      const nodeY = node.y;
+      const distanceFromNode = Math.sqrt(
+        Math.pow(x - nodeX, 2) + Math.pow(y - nodeY, 2)
+      );
+
+      return distanceFromNode <= NODE_RADIUS;
+    });
+  };
+
+  return { nodes, addNode, highlightNode, resetNodeColor, isPointInANode };
 };
 
-export default useNodes
+export default useNodes;
