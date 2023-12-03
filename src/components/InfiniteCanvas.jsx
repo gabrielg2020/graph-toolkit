@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Stage, Layer, Circle, Line } from 'react-konva';
 import { v4 as uuidv4 } from 'uuid';
 import useNodes from '../hooks/useNodes';
+import useEdges from '../hooks/useEdges';
 import useCtrlKey from '../hooks/useCtrlKey';
 import isPointInANode from '../utils/isPointInNode';
 
 function InfiniteCanvas() {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const { nodes, addNode, highlightNode, resetNodeColor } = useNodes();
-  const [edges, setEdges] = useState([]);
+  const { edges, addEdge} = useEdges()
   const [selectedNode, setSelectedNode] = useState(false);
   const ctrlIsPressed = useCtrlKey();
 
@@ -41,15 +42,12 @@ function InfiniteCanvas() {
           highlightNode(clickedNode);
           setSelectedNode(clickedNode);
         } else {
-          setEdges([
-            ...edges,
-            {
-              startX: selectedNode.x,
-              startY: selectedNode.y,
-              endX: clickedNode.x,
-              endY: clickedNode.y,
-            },
-          ]);
+          addEdge({
+            startX: selectedNode.x,
+            startY: selectedNode.y,
+            endX: clickedNode.x,
+            endY: clickedNode.y,
+          });
           resetNodeColor();
           setSelectedNode(false);
         }
