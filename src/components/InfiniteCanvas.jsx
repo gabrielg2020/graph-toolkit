@@ -5,12 +5,20 @@ import useNodes from '../hooks/useNodes';
 import useEdges from '../hooks/useEdges';
 import useCtrlKey from '../hooks/useCtrlKey';
 import isPointInANode from '../utils/isPointInNode';
+import {
+  NODE_RADIUS,
+  NODE_COLOR,
+  EDGE_STROKE_COLOR,
+  EDGE_STROKE_WIDTH,
+} from '../constants/appConstants';
 
 function InfiniteCanvas() {
+  // local state
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
-  const { nodes, addNode, highlightNode, resetNodeColor } = useNodes();
-  const { edges, addEdge} = useEdges()
   const [selectedNode, setSelectedNode] = useState(false);
+  // hooked state
+  const { nodes, addNode, highlightNode, resetNodeColor } = useNodes();
+  const { edges, addEdge } = useEdges();
   const ctrlIsPressed = useCtrlKey();
 
   const handleDragEnd = (e) => {
@@ -26,11 +34,11 @@ function InfiniteCanvas() {
     const pointerPosition = stage.getPointerPosition();
     const adjustedX = pointerPosition.x - stagePos.x;
     const adjustedY = pointerPosition.y - stagePos.y;
+
     const clickedNode = isPointInANode(nodes, {
       x: adjustedX,
       y: adjustedY,
     });
-    console.log('click status:' + clickedNode);
 
     if (ctrlIsPressed) {
       if (clickedNode === undefined) {
@@ -57,8 +65,7 @@ function InfiniteCanvas() {
         id: uuidv4(),
         x: adjustedX,
         y: adjustedY,
-        radius: 30,
-        color: 'red',
+        color: NODE_COLOR,
       });
     }
   };
@@ -79,7 +86,7 @@ function InfiniteCanvas() {
             key={node.id}
             x={node.x}
             y={node.y}
-            radius={node.radius}
+            radius={NODE_RADIUS}
             fill={node.color}
           />
         ))}
@@ -88,8 +95,8 @@ function InfiniteCanvas() {
           <Line
             key={i}
             points={[edge.startX, edge.startY, edge.endX, edge.endY]}
-            stroke={'black'}
-            strokeWidth={2}
+            stroke={EDGE_STROKE_COLOR}
+            strokeWidth={EDGE_STROKE_WIDTH}
           />
         ))}
       </Layer>
