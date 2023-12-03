@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Stage, Layer, Circle, Line } from 'react-konva';
 import { v4 as uuidv4 } from 'uuid';
+import useNodes from '../hooks/useNodes';
 import useCtrlKey from '../hooks/useCtrlKey';
 import isPointInANode from '../utils/isPointInNode';
 
 function InfiniteCanvas() {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
-  const [nodes, setNodes] = useState([]);
+  const { nodes, addNode, highlightNode, resetNodeColor } = useNodes();
   const [edges, setEdges] = useState([]);
   const [selectedNode, setSelectedNode] = useState(false);
   const ctrlIsPressed = useCtrlKey();
@@ -37,13 +38,7 @@ function InfiniteCanvas() {
       } else {
         if (selectedNode === false) {
           // if we haven't selected
-          setNodes(
-            nodes.map((node) =>
-              node.id === clickedNode.id
-                ? { ...node, color: 'blue' }
-                : node
-            )
-          );
+          highlightNode(clickedNode);
           setSelectedNode(clickedNode);
         } else {
           setEdges([
@@ -55,25 +50,18 @@ function InfiniteCanvas() {
               endY: clickedNode.y,
             },
           ]);
-          setNodes(
-            nodes.map((node) =>
-              node.color === 'blue' ? { ...node, color: 'red' } : node
-            )
-          );
+          resetNodeColor();
           setSelectedNode(false);
         }
       }
     } else {
-      setNodes([
-        ...nodes,
-        {
-          id: uuidv4(),
-          x: adjustedX,
-          y: adjustedY,
-          radius: 30,
-          color: 'red',
-        },
-      ]);
+      addNode({
+        id: uuidv4(),
+        x: adjustedX,
+        y: adjustedY,
+        radius: 30,
+        color: 'red',
+      });
     }
   };
 
