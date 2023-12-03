@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Stage, Layer, Circle, Line } from 'react-konva';
+import { v4 as uuidv4 } from 'uuid';
 import useCtrlKey from '../hooks/useCtrlKey';
-import isPointInCircle from '../utils/pointInCircle';
+import isPointInANode from '../utils/isPointInNode';
 
 function InfiniteCanvas() {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
-  const [circles, setCircles] = useState([]);
-  const [lines, setLines] = useState([]);
-  const [selectedCircle, setSelectedCircle] = useState(false)
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  const [selectedNode, setSelectedNode] = useState(false);
   const ctrlIsPressed = useCtrlKey();
 
   const handleDragEnd = (e) => {
@@ -23,36 +24,50 @@ function InfiniteCanvas() {
     const pointerPosition = stage.getPointerPosition();
     const adjustedX = pointerPosition.x - stagePos.x;
     const adjustedY = pointerPosition.y - stagePos.y;
+    const clickedNode = isPointInANode(nodes, {
+      x: adjustedX,
+      y: adjustedY,
+    });
+    console.log('click status:' + clickedNode);
 
     if (ctrlIsPressed) {
-      // loop through each node
-      const updatedCircles = circles.map((circle) => {
-        if (isPointInCircle(circle, { x: adjustedX, y: adjustedY })) {
-          if (selectedCircle === false) { // if we haven't selected a circle
-            console.log(circle);
-            setSelectedCircle(circle) // select circle
-            return { ...circle, color: 'blue' };
-          } else { // if we have selected a circle
-            setLines([ // create the line
-              ...lines, {
-                startX: selectedCircle.x,
-                startY: selectedCircle.y,
-                endX: circle.x,
-                endY: circle. y,
-            }])
-            setSelectedCircle(false) // unselect to go again
-          }
+      if (clickedNode === undefined) {
+        // only if we clicked in a node
+        return;
+      } else {
+        if (selectedNode === false) {
+          // if we haven't selected
+          setNodes(
+            nodes.map((node) =>
+              node.id === clickedNode.id
+                ? { ...node, color: 'blue' }
+                : node
+            )
+          );
+          setSelectedNode(clickedNode);
         } else {
-           setSelectedCircle(false) // if we have clicked in empty space unselect
+          setEdges([
+            ...edges,
+            {
+              startX: selectedNode.x,
+              startY: selectedNode.y,
+              endX: clickedNode.x,
+              endY: clickedNode.y,
+            },
+          ]);
+          setNodes(
+            nodes.map((node) =>
+              node.color === 'blue' ? { ...node, color: 'red' } : node
+            )
+          );
+          setSelectedNode(false);
         }
-        return { ...circle, color:'red'};
-      });
-      setCircles(updatedCircles); // set state to new circles list
-
+      }
     } else {
-      setCircles([
-        ...circles,
+      setNodes([
+        ...nodes,
         {
+          id: uuidv4(),
           x: adjustedX,
           y: adjustedY,
           radius: 30,
@@ -73,22 +88,22 @@ function InfiniteCanvas() {
       y={stagePos.y}
     >
       <Layer>
-        {circles.map((circle, i) => (
+        {nodes.map((node) => (
           <Circle
-            key={i}
-            x={circle.x}
-            y={circle.y}
-            radius={circle.radius}
-            fill={circle.color}
+            key={node.id}
+            x={node.x}
+            y={node.y}
+            radius={node.radius}
+            fill={node.color}
           />
         ))}
 
-        {lines.map((line, i) => (
+        {edges.map((edge, i) => (
           <Line
             key={i}
-            points={[line.startX, line.startY, line.endX, line.endY]}
+            points={[edge.startX, edge.startY, edge.endX, edge.endY]}
             stroke={'black'}
-            strokeWidth={'2'}
+            strokeWidth={2}
           />
         ))}
       </Layer>
