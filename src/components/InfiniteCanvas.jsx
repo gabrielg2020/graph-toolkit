@@ -16,8 +16,14 @@ function InfiniteCanvas() {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [selectedNode, setSelectedNode] = useState(false);
   // hooked state
-  const { nodes, addNode, highlightNode, resetNodeColor, isPointInANode } =
-    useNodes();
+  const {
+    nodes,
+    addNode,
+    highlightNode,
+    resetNodeColor,
+    isPointInANode,
+    nodePlacementIsValid,
+  } = useNodes();
   const { edges, addEdge } = useEdges();
   const ctrlIsPressed = useCtrlKey();
 
@@ -61,12 +67,15 @@ function InfiniteCanvas() {
         }
       }
     } else {
-      addNode({
-        id: uuidv4(),
-        x: adjustedX,
-        y: adjustedY,
-        color: NODE_COLOR,
-      });
+      console.log({ x: adjustedX, y: adjustedY });
+      if (nodePlacementIsValid({ x: adjustedX, y: adjustedY })) {
+        addNode({
+          id: uuidv4(),
+          x: adjustedX,
+          y: adjustedY,
+          color: NODE_COLOR,
+        });
+      }
     }
   };
 

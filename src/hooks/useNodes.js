@@ -33,17 +33,39 @@ const useNodes = () => {
     const y = point.y;
 
     return nodes.find((node) => {
-      const nodeX = node.x;
-      const nodeY = node.y;
       const distanceFromNode = Math.sqrt(
-        Math.pow(x - nodeX, 2) + Math.pow(y - nodeY, 2)
+        Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2)
       );
 
       return distanceFromNode <= NODE_RADIUS;
     });
   };
 
-  return { nodes, addNode, highlightNode, resetNodeColor, isPointInANode };
+  const nodePlacementIsValid = (point) => {
+    if (nodes.length === 0) {
+      return true
+    }
+
+    const x = point.x;
+    const y = point.y;
+
+    return nodes.every((node) =>{
+      const distanceFromNode = Math.sqrt(
+        Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2)
+      );
+
+      return distanceFromNode > 2*NODE_RADIUS
+    })
+  }
+
+  return {
+    nodes,
+    addNode,
+    highlightNode,
+    resetNodeColor,
+    isPointInANode,
+    nodePlacementIsValid,
+  };
 };
 
 export default useNodes;
