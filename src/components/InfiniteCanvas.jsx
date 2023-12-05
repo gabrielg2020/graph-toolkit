@@ -61,7 +61,12 @@ function InfiniteCanvas() {
         endPos: endNodePos,
       });
       setActiveNodeID(false);
-      createConnection(activeNodeID, clickedNodeID, edgeID); // from 1 -> 2
+      createConnection(activeNodeID, clickedNodeID, edgeID);
+    }
+
+    if (activeNodeID === clickedNodeID) {
+      setActiveNodeID(false);
+      return;
     }
   };
 
