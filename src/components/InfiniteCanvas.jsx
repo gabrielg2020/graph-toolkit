@@ -14,14 +14,14 @@ import {
 function InfiniteCanvas() {
   // local state
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
-  const [selectedNode, setSelectedNode] = useState(false);
+  const [activeNodeID, setActiveNodeID] = useState(false);
   // hooked state
   const {
     nodes,
     addNode,
     highlightNode,
     resetNodeColor,
-    isPointInANode,
+    grabNodePos,
     nodePlacementIsValid,
   } = useNodes();
   const { edges, addEdge } = useEdges();
@@ -35,47 +35,48 @@ function InfiniteCanvas() {
     console.log('dragged to end');
   };
 
+  const handleNodeClick = (e) => {
+    e.cancelBubble = true;
+    if (!ctrlIsPressed) {
+      // make sure that ctrl IS pressed
+      return;
+    }
+
+    const clickedNodeId = e.target.attrs.id;
+
+    if (activeNodeID === false) {
+      // we don't have an active node
+      highlightNode(clickedNodeId);
+      setActiveNodeID(clickedNodeId);
+    } else {
+      // we do have an active node
+      resetNodeColor();
+      const startNodePos = grabNodePos(activeNodeID);
+      const endNodePos = grabNodePos(clickedNodeId);
+      addEdge({
+        // create edge
+        id: uuidv4,
+        startPos: startNodePos,
+        endPos: endNodePos,
+      });
+      setActiveNodeID(false);
+    }
+  };
+
   const handleStageClick = (e) => {
     const stage = e.target.getStage();
     const pointerPosition = stage.getPointerPosition();
     const adjustedX = pointerPosition.x - stagePos.x;
     const adjustedY = pointerPosition.y - stagePos.y;
 
-    const clickedNode = isPointInANode({
-      x: adjustedX,
-      y: adjustedY,
-    });
-
-    if (ctrlIsPressed) {
-      if (clickedNode === undefined) {
-        // only if we clicked in a node
-        return;
-      } else {
-        if (selectedNode === false) {
-          // if we haven't selected
-          highlightNode(clickedNode);
-          setSelectedNode(clickedNode);
-        } else {
-          addEdge({
-            startX: selectedNode.x,
-            startY: selectedNode.y,
-            endX: clickedNode.x,
-            endY: clickedNode.y,
-          });
-          resetNodeColor();
-          setSelectedNode(false);
-        }
-      }
-    } else {
-      console.log({ x: adjustedX, y: adjustedY });
-      if (nodePlacementIsValid({ x: adjustedX, y: adjustedY })) {
-        addNode({
-          id: uuidv4(),
-          x: adjustedX,
-          y: adjustedY,
-          color: NODE_COLOR,
-        });
-      }
+    console.log({ x: adjustedX, y: adjustedY });
+    if (nodePlacementIsValid({ x: adjustedX, y: adjustedY })) {
+      addNode({
+        id: uuidv4(),
+        x: adjustedX,
+        y: adjustedY,
+        color: NODE_COLOR,
+      });
     }
   };
 
@@ -93,17 +94,25 @@ function InfiniteCanvas() {
         {nodes.map((node) => (
           <Circle
             key={node.id}
+            id={node.id}
             x={node.x}
             y={node.y}
+            onClick={handleNodeClick}
             radius={NODE_RADIUS}
             fill={node.color}
           />
         ))}
 
-        {edges.map((edge, i) => (
+        {edges.map((edge) => (
           <Line
-            key={i}
-            points={[edge.startX, edge.startY, edge.endX, edge.endY]}
+            key={edge.id}
+            id={edge.id}
+            points={[
+              edge.startPos.x,
+              edge.startPos.y,
+              edge.endPos.x,
+              edge.endPos.y,
+            ]}
             stroke={EDGE_STROKE_COLOR}
             strokeWidth={EDGE_STROKE_WIDTH}
           />

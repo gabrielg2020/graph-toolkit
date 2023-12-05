@@ -8,10 +8,10 @@ const useNodes = () => {
     setNodes((prevNodes) => [...prevNodes, newNode]);
   };
 
-  const highlightNode = (clickedNode) => {
+  const highlightNode = (id) => {
     setNodes(
       nodes.map((node) =>
-        node.id === clickedNode.id
+        node.id === id
           ? { ...node, color: NODE_HIGHLIGHT_COLOR }
           : node
       )
@@ -28,18 +28,12 @@ const useNodes = () => {
     );
   };
 
-  const isPointInANode = (point) => {
-    const x = point.x;
-    const y = point.y;
-
-    return nodes.find((node) => {
-      const distanceFromNode = Math.sqrt(
-        Math.pow(x - node.x, 2) + Math.pow(y - node.y, 2)
-      );
-
-      return distanceFromNode <= NODE_RADIUS;
-    });
-  };
+  const grabNodePos = (id) => {
+    const node = nodes.find((node) => node.id === id);
+    if (node) {
+      return { x: node.x, y: node.y };
+    }
+  }
 
   const nodePlacementIsValid = (point) => {
     if (nodes.length === 0) {
@@ -63,7 +57,7 @@ const useNodes = () => {
     addNode,
     highlightNode,
     resetNodeColor,
-    isPointInANode,
+    grabNodePos,
     nodePlacementIsValid,
   };
 };
