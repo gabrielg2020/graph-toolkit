@@ -55,7 +55,7 @@ function InfiniteCanvas() {
       const endNodePos = grabNodePos(clickedNodeId);
       addEdge({
         // create edge
-        id: uuidv4,
+        id: uuidv4(),
         startPos: startNodePos,
         endPos: endNodePos,
       });
@@ -69,7 +69,6 @@ function InfiniteCanvas() {
     const adjustedX = pointerPosition.x - stagePos.x;
     const adjustedY = pointerPosition.y - stagePos.y;
 
-    console.log({ x: adjustedX, y: adjustedY });
     if (nodePlacementIsValid({ x: adjustedX, y: adjustedY })) {
       addNode({
         id: uuidv4(),
