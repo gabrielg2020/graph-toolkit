@@ -15,7 +15,7 @@ import {
 function InfiniteCanvas() {
   // local state
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
-  const [activeNodeID, setActiveNodeID] = useState(false);
+  const [activeNodeId, setActiveNodeId] = useState(false);
   // hooked state
   const {
     nodes,
@@ -42,20 +42,20 @@ function InfiniteCanvas() {
 
   const handleNodeDragMove = (e) => {
     e.cancelBubble = true;
-    const draggedNodeID = e.target.attrs.id;
-    const connections = getConnection(draggedNodeID);
-    const nodePos = getNodePos(draggedNodeID);
-    
+    const draggedNodeId = e.target.attrs.id;
+    const connections = getConnection(draggedNodeId);
+    const nodePos = getNodePos(draggedNodeId);
+
     connections.forEach((connection) => {
       // for each connection we check wether the node connects to the start or the end of the edge
-      const edgeID = connection.edgeID;
+      const edgeId = connection.edgeId;
       if (connection.whatIsNode === 'start') {
-        setStartPos(edgeID, nodePos);
+        setStartPos(edgeId, nodePos);
       } else {
-        setEndPos(edgeID, nodePos);
+        setEndPos(edgeId, nodePos);
       }
     });
-    setNodePos(draggedNodeID, { x: e.target.attrs.x, y: e.target.attrs.y });
+    setNodePos(draggedNodeId, { x: e.target.attrs.x, y: e.target.attrs.y });
   };
 
   const handleNodeDragEnd = (e) => {
@@ -69,29 +69,29 @@ function InfiniteCanvas() {
       return;
     }
 
-    const clickedNodeID = e.target.attrs.id;
+    const clickedNodeId = e.target.attrs.id;
 
-    if (activeNodeID === false) {
+    if (activeNodeId === false) {
       // we don't have an active node
-      highlightNode(clickedNodeID);
-      setActiveNodeID(clickedNodeID);
+      highlightNode(clickedNodeId);
+      setActiveNodeId(clickedNodeId);
     } else {
       // we do have an active node
-      const startNodePos = getNodePos(activeNodeID);
-      const endNodePos = getNodePos(clickedNodeID);
-      const edgeID = uuidv4();
+      const startNodePos = getNodePos(activeNodeId);
+      const endNodePos = getNodePos(clickedNodeId);
+      const edgeId = uuidv4();
       addEdge({
         // create edge
-        id: edgeID,
+        id: edgeId,
         startPos: startNodePos,
         endPos: endNodePos,
       });
-      setActiveNodeID(false);
-      createConnection(activeNodeID, clickedNodeID, edgeID);
+      setActiveNodeId(false);
+      createConnection(activeNodeId, clickedNodeId, edgeId);
     }
 
-    if (activeNodeID === clickedNodeID) {
-      setActiveNodeID(false);
+    if (activeNodeId === clickedNodeId) {
+      setActiveNodeId(false);
       return;
     }
   };

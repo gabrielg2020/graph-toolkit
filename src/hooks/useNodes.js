@@ -35,24 +35,24 @@ const useNodes = () => {
     );
   };
 
-  const createConnection = (startID, endID, edgeID) => {
+  const createConnection = (startId, endId, edgeId) => {
     setNodes(
       nodes.map((node) => {
-        if (node.id === startID) {
+        if (node.id === startId) {
           return {
             ...node,
-            color: NODE_COLOR, // reset the color of the startID
+            color: NODE_COLOR, // reset the color of the startId
             connections: [
               ...node.connections,
-              { whatIsNode: 'start', endID: endID, edgeID: edgeID },
+              { whatIsNode: 'start', endId: endId, edgeId: edgeId },
             ], // add connection to the start node
           };
-        } else if (node.id === endID) {
+        } else if (node.id === endId) {
           return {
             ...node,
             connections: [
               ...node.connections,
-              { whatIsNode: 'end', endID: startID, edgeID: edgeID },
+              { whatIsNode: 'end', endId: startId, edgeId: edgeId },
             ],
           }; // add connection to the end node
         }
