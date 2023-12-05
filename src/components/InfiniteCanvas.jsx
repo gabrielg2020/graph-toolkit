@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Stage, Layer, Circle, Line } from 'react-konva';
 import { v4 as uuidv4 } from 'uuid';
 import useNodes from '../hooks/useNodes';
@@ -20,9 +20,10 @@ function InfiniteCanvas() {
     nodes,
     addNode,
     highlightNode,
-    resetNodeColor,
     grabNodePos,
+    createConnection,
     nodePlacementIsValid,
+    grabNode, // ONLY USE FOR TESTING
   } = useNodes();
   const { edges, addEdge } = useEdges();
   const ctrlIsPressed = useCtrlKey();
@@ -42,24 +43,25 @@ function InfiniteCanvas() {
       return;
     }
 
-    const clickedNodeId = e.target.attrs.id;
+    const clickedNodeID = e.target.attrs.id;
 
     if (activeNodeID === false) {
       // we don't have an active node
-      highlightNode(clickedNodeId);
-      setActiveNodeID(clickedNodeId);
+      highlightNode(clickedNodeID);
+      setActiveNodeID(clickedNodeID);
     } else {
       // we do have an active node
-      resetNodeColor();
       const startNodePos = grabNodePos(activeNodeID);
-      const endNodePos = grabNodePos(clickedNodeId);
+      const endNodePos = grabNodePos(clickedNodeID);
+      const edgeID = uuidv4();
       addEdge({
         // create edge
-        id: uuidv4(),
+        id: edgeID,
         startPos: startNodePos,
         endPos: endNodePos,
       });
       setActiveNodeID(false);
+      createConnection(activeNodeID, clickedNodeID, edgeID); // from 1 -> 2
     }
   };
 
@@ -75,6 +77,7 @@ function InfiniteCanvas() {
         x: adjustedX,
         y: adjustedY,
         color: NODE_COLOR,
+        connections: [],
       });
     }
   };
