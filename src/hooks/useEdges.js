@@ -7,7 +7,24 @@ const useEdges = () => {
     setEdges((prevEdges) => [...prevEdges, newEdge]);
   };
 
-  return { edges, addEdge };
+  const setStartPos = (id, pos) => {
+    setEdges((prevEdges) =>
+      prevEdges.map((edge) =>
+        edge.id === id ? { ...edge, startPos: pos } : edge
+      )
+    );
+  };
+
+  const setEndPos = (id, pos) => {
+    setEdges((prevEdges) =>
+      prevEdges.map((edge) =>
+        edge.id === id ? { ...edge, endPos: pos } : edge
+      )
+    );
+  };
+
+
+  return { edges, addEdge, setStartPos, setEndPos };
 };
 
 export default useEdges;

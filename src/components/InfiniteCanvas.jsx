@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import useNodes from '../hooks/useNodes';
 import useEdges from '../hooks/useEdges';
 import useCtrlKey from '../hooks/useCtrlKey';
+import useShiftKey from '../hooks/useShiftKey';
 import {
   NODE_RADIUS,
   NODE_COLOR,
@@ -20,20 +21,45 @@ function InfiniteCanvas() {
     nodes,
     addNode,
     highlightNode,
-    grabNodePos,
+    getNodePos,
+    setNodePos,
     createConnection,
+    getConnection,
     nodePlacementIsValid,
     grabNode, // ONLY USE FOR TESTING
   } = useNodes();
-  const { edges, addEdge } = useEdges();
+  const { edges, addEdge, setStartPos, setEndPos } = useEdges();
   const ctrlIsPressed = useCtrlKey();
+  const shiftIsPressed = useShiftKey();
 
-  const handleDragEnd = (e) => {
+  const handleStageDragEnd = (e) => {
     setStagePos({
       x: e.target.x(),
       y: e.target.y(),
     });
-    console.log('dragged to end');
+    console.log('dragging stage');
+  };
+
+  const handleNodeDragMove = (e) => {
+    e.cancelBubble = true;
+    const draggedNodeID = e.target.attrs.id;
+    const connections = getConnection(draggedNodeID);
+    const nodePos = getNodePos(draggedNodeID);
+    
+    connections.forEach((connection) => {
+      // for each connection we check wether the node connects to the start or the end of the edge
+      const edgeID = connection.edgeID;
+      if (connection.whatIsNode === 'start') {
+        setStartPos(edgeID, nodePos);
+      } else {
+        setEndPos(edgeID, nodePos);
+      }
+    });
+    setNodePos(draggedNodeID, { x: e.target.attrs.x, y: e.target.attrs.y });
+  };
+
+  const handleNodeDragEnd = (e) => {
+    e.cancelBubble = true;
   };
 
   const handleNodeClick = (e) => {
@@ -51,8 +77,8 @@ function InfiniteCanvas() {
       setActiveNodeID(clickedNodeID);
     } else {
       // we do have an active node
-      const startNodePos = grabNodePos(activeNodeID);
-      const endNodePos = grabNodePos(clickedNodeID);
+      const startNodePos = getNodePos(activeNodeID);
+      const endNodePos = getNodePos(clickedNodeID);
       const edgeID = uuidv4();
       addEdge({
         // create edge
@@ -87,29 +113,21 @@ function InfiniteCanvas() {
     }
   };
 
+  useEffect(() => {
+    //console.log(nodes);
+  }, [nodes]);
+
   return (
     <Stage
       width={window.innerWidth}
       height={window.innerHeight}
-      draggable
-      onDragEnd={handleDragEnd}
+      draggable={!shiftIsPressed}
+      onDragEnd={handleStageDragEnd}
       onClick={handleStageClick}
       x={stagePos.x}
       y={stagePos.y}
     >
       <Layer>
-        {nodes.map((node) => (
-          <Circle
-            key={node.id}
-            id={node.id}
-            x={node.x}
-            y={node.y}
-            onClick={handleNodeClick}
-            radius={NODE_RADIUS}
-            fill={node.color}
-          />
-        ))}
-
         {edges.map((edge) => (
           <Line
             key={edge.id}
@@ -122,6 +140,21 @@ function InfiniteCanvas() {
             ]}
             stroke={EDGE_STROKE_COLOR}
             strokeWidth={EDGE_STROKE_WIDTH}
+          />
+        ))}
+
+        {nodes.map((node) => (
+          <Circle
+            key={node.id}
+            id={node.id}
+            x={node.x}
+            y={node.y}
+            draggable={!ctrlIsPressed}
+            onClick={handleNodeClick}
+            onDragMove={handleNodeDragMove}
+            onDragEnd={handleNodeDragEnd}
+            radius={NODE_RADIUS}
+            fill={node.color}
           />
         ))}
       </Layer>

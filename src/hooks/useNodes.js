@@ -20,11 +20,19 @@ const useNodes = () => {
     );
   };
 
-  const grabNodePos = (id) => {
+  const getNodePos = (id) => {
     const node = nodes.find((node) => node.id === id);
     if (node) {
       return { x: node.x, y: node.y };
     }
+  };
+
+  const setNodePos = (id, pos) => {
+    setNodes(
+      nodes.map((node) =>
+        node.id === id ? { ...node, x: pos.x, y: pos.y } : node
+      )
+    );
   };
 
   const createConnection = (startID, endID, edgeID) => {
@@ -36,7 +44,7 @@ const useNodes = () => {
             color: NODE_COLOR, // reset the color of the startID
             connections: [
               ...node.connections,
-              { endID: endID, edgeID: edgeID },
+              { whatIsNode: 'start', endID: endID, edgeID: edgeID },
             ], // add connection to the start node
           };
         } else if (node.id === endID) {
@@ -44,7 +52,7 @@ const useNodes = () => {
             ...node,
             connections: [
               ...node.connections,
-              { endID: startID, edgeID: edgeID },
+              { whatIsNode: 'end', endID: startID, edgeID: edgeID },
             ],
           }; // add connection to the end node
         }
@@ -52,6 +60,13 @@ const useNodes = () => {
       })
     );
   };
+
+  const getConnection = (id) => {
+    const node = nodes.find((node) => node.id === id);
+    if (node) {
+      return node.connections;
+    }
+  } 
 
   const nodePlacementIsValid = (point) => {
     if (nodes.length === 0) {
@@ -81,8 +96,10 @@ const useNodes = () => {
     nodes,
     addNode,
     highlightNode,
-    grabNodePos,
+    getNodePos,
+    setNodePos,
     createConnection,
+    getConnection,
     nodePlacementIsValid,
     grabNode,
   };
